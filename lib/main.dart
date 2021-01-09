@@ -21,7 +21,7 @@ void main() async {
       "/donate": (context) => Donate(),
       "/faq": (context) => Faq(),
       "/settings": (context) => Settings(),
-      "/map": (context) => Map()
+      "/map": (context) => GMap()
     },
   ));
 }

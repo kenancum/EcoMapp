@@ -1,19 +1,73 @@
+import 'dart:collection';
+import 'dart:convert';
+import 'package:Ecomapp/Entitites/RecycleBin.dart';
 import 'package:Ecomapp/Screens/drawers.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter_config/flutter_config.dart';
+import 'package:http/http.dart' as http;
 
-class Map extends StatefulWidget {
+class GMap extends StatefulWidget {
   @override
-  _Map createState() => new _Map();
+  _GMap createState() => new _GMap();
 }
 
-class _Map extends State<Map> {
+class _GMap extends State<GMap> {
+  String url = "https://data.cityofnewyork.us/resource/sxx4-xhzg.json";
+  List<RecycleBin> recycleBinList;
+  Set<Marker> _markers = HashSet<Marker>();
+  GoogleMapController _mapController;
+  void _onMapCreated(GoogleMapController controller) async {
+    _mapController = controller;
+    // setState(() {
+    //   _markers.add(Marker(
+    //       markerId: MarkerId("0"),
+    //       position: LatLng(double.parse(recycleBinList[0].latitude),
+    //           double.parse(recycleBinList[0].longitude))));
+    // });
+  }
+
+  Future<List<RecycleBin>> getRecycleBins() async {
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      List<RecycleBin> recycleBinList = parseRecycleBins(response.body);
+      return recycleBinList;
+    }
+  }
+
+  List<RecycleBin> parseRecycleBins(String responseBody) {
+    final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
+    return parsed.map<RecycleBin>((json) => RecycleBin.fromJson(json)).toList();
+  }
+
+  Future loadMarkers() async {
+    recycleBinList = await getRecycleBins();
+
+    setState(() {
+      for (int i = 0; i < recycleBinList.length; i++) {
+        if (recycleBinList[i].longitude != null) {
+          _markers.add(Marker(
+              markerId: MarkerId(i.toString()),
+              position: LatLng(double.parse(recycleBinList[i].latitude),
+                  double.parse(recycleBinList[i].longitude)),
+              infoWindow: InfoWindow(
+                  title: recycleBinList[i].address,
+                  snippet: recycleBinList[i].siteType)));
+        }
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadMarkers();
+  }
+
   @override
   Widget build(BuildContext context) {
     final GlobalKey<ScaffoldState> _scaffoldKey =
         new GlobalKey<ScaffoldState>();
-
     return Scaffold(
       backgroundColor: Colors.blueGrey[900],
       key: _scaffoldKey,
@@ -52,14 +106,16 @@ class _Map extends State<Map> {
           elevation: 0,
         ),
       ),
-      body: Container(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        child: GoogleMap(
-            initialCameraPosition: CameraPosition(
-                target: LatLng(40.84474509964071, -73.88265819913236),
-                zoom: 12.0)),
-      ),
+      body: Stack(children: <Widget>[
+        GoogleMap(
+          onMapCreated: _onMapCreated,
+          initialCameraPosition: CameraPosition(
+            target: LatLng(40.84474509964071, -73.88265819913236),
+            zoom: 12.0,
+          ),
+          markers: _markers,
+        ),
+      ]),
     );
   }
 }
