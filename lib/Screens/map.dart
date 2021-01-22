@@ -1,6 +1,6 @@
 import 'dart:collection';
 import 'dart:convert';
-import 'package:Ecomapp/Entitites/RecycleBin.dart';
+import 'package:Ecomapp/Models/RecycleBin.dart';
 import 'package:Ecomapp/Screens/drawers.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -18,12 +18,6 @@ class _GMap extends State<GMap> {
   GoogleMapController _mapController;
   void _onMapCreated(GoogleMapController controller) async {
     _mapController = controller;
-    // setState(() {
-    //   _markers.add(Marker(
-    //       markerId: MarkerId("0"),
-    //       position: LatLng(double.parse(recycleBinList[0].latitude),
-    //           double.parse(recycleBinList[0].longitude))));
-    // });
   }
 
   Future<List<RecycleBin>> getRecycleBins() async {
