@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Ecomapp/Screens/drawers.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class Events extends StatefulWidget {
   @override
@@ -56,24 +57,12 @@ class _State extends State<Events> {
           elevation: 0,
         ),
       ),
-      body: SingleChildScrollView(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Column(
-            children: [
-              Container(
-                  padding: EdgeInsets.all(20),
-                  child: Text('Events',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold))),
-            ],
-          )
-        ],
-      )),
+      body: WebView(
+        initialUrl: 'https://www.recyclingtoday.com',
+        onWebViewCreated: (WebViewController webViewController) {
+          //  _controller.complete(webViewController);
+        },
+      ),
     );
   }
 }
